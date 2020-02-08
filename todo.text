@@ -1,0 +1,21 @@
+
+- write tests for expected scenarios and then implement them
+- try to describe the architecture and commands used in readme
+
+backlog:
+- prod/dev
+- rozdzielenie folderów
+
+TODO selected:
+    - mongodb with file references
+    - S3 as file keeper + cronjob with s3 refresh
+    -
+
+
+TODO doing:
+    - working docker
+        - installing ffmpeg
+
+
+TODO done:
+    -

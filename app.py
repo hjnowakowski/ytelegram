@@ -54,11 +54,12 @@ def download_handler(update: Update, context: CallbackContext):
     update.message.reply_text("Random number: {}".format(number))
 
 
-
 if __name__ == '__main__':
     logger.info("Starting bot")
     updater = Updater(TOKEN, use_context=True)
 
     updater.dispatcher.add_handler(CommandHandler("start", start_handler))
     updater.dispatcher.add_handler(CommandHandler("download", download_handler))
+
+    run(updater)
 

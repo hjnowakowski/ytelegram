@@ -11,7 +11,6 @@ ydl_opts = {
         'preferredcodec': 'mp3',
         'preferredquality': '192',
     }],
-    #'logger': MyLogger(),
     'progress_hooks': [my_hook],
     'outtmpl': '/app/audio-file/file.%(ext)s'
 }
@@ -19,3 +18,4 @@ ydl_opts = {
 def download(URL):
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         ydl.download([URL])
+
