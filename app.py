@@ -37,14 +37,15 @@ def start_handler(update: Update, context: CallbackContext):
     logger.info("User {} started bot".format(update.effective_user["id"]))
     URL = " ".join(context.args)
     logger.info("Argument" + URL)
-    # update.message.reply_text("Dobry, podaj proszę URL\nbędymy go potem ściągać\nżeby pobrać wyślij wiadomość o treści /random")
-    if(mode == "prod"):
-        download(URL)
+    download(URL)
+    print("Done, now uploading...")
+    context.bot.send_audio(chat_id=update.effective_chat.id, audio=open('/app/audio-file/file.mp3', 'rb'), timeout=1200)
+
 
 
 def download_handler(update: Update, context: CallbackContext):
     number = random.randint(0, 10)
-    logger.info("User {} randomed number {}".format(update.effective_user["id"], number))
+    logger.info("User {} randomised number {}".format(update.effective_user["id"], number))
 
     context.bot.send_audio(chat_id=update.effective_chat.id, audio=open('/app/audio-file/file.mp3', 'rb'))
 
@@ -56,7 +57,7 @@ def download_handler(update: Update, context: CallbackContext):
 
 if __name__ == '__main__':
     logger.info("Starting bot")
-    updater = Updater(TOKEN, use_context=True)
+    updater = Updater(TOKEN, use_context=True, request_kwargs={'read_timeout': 250, 'connect_timeout': 250})
 
     updater.dispatcher.add_handler(CommandHandler("start", start_handler))
     updater.dispatcher.add_handler(CommandHandler("download", download_handler))
