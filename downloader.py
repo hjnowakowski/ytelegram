@@ -1,4 +1,5 @@
 import youtube_dl
+import os
 
 
 def my_hook(d):
@@ -18,7 +19,8 @@ ydl_opts = {
     }
     ],
     'progress_hooks': [my_hook],
-    'outtmpl': '/app/audio-file/file.%(ext)s'
+    'outtmpl': '/app/audio-file/file.%(ext)s',
+    'nocheckcertificate': True
 }
 
 
