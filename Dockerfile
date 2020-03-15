@@ -7,4 +7,4 @@ RUN pipenv lock  \
  && mkdir "/app/audio-file" \
  && pipenv install --dev --ignore-pipfile --system --deploy
 
-CMD ["python3", "src/app.py"]
+CMD ["python3", "app.py"]

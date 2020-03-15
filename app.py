@@ -6,7 +6,7 @@ import sys
 import validators
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandler, Filters
-from src.downloader import download_audio_to_file, download_metadata_to_file, get_metadata_from_file
+from downloader import download_audio_to_file, download_metadata_to_file, get_metadata_from_file
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -15,6 +15,11 @@ logger = logging.getLogger()
 
 mode = os.getenv("MODE")
 TOKEN = os.getenv("TOKEN")
+
+allowedUserIds = [
+    643375696,
+    464401808
+]
 
 if mode == "dev":
     def run(updater):
@@ -33,6 +38,11 @@ else:
 
 
 def download_handler(update: Update, context: CallbackContext):
+
+    if update.effective_chat['id'] not in allowedUserIds:
+        update.message.reply_text('Your user is not allowed to use this bot.')
+        return
+
     if os.path.isfile('/app/audio-file/file.mp3'):
         metadata = get_metadata_from_file()
         context.bot.send_audio(title=metadata['title'],
@@ -47,6 +57,11 @@ def download_handler(update: Update, context: CallbackContext):
 
 
 def default_handler(update: Update, context: CallbackContext):
+
+    if update.effective_chat['id'] not in allowedUserIds:
+        update.message.reply_text('Your user is not allowed to use this bot.')
+        return
+
     URL = update.effective_message.text
     if validators.url(URL):
         update.message.reply_text('Oh User! It\'s a url!\nIm downloading it, give me few minutes')
@@ -68,7 +83,7 @@ if __name__ == '__main__':
     logger.info("Starting bot")
     updater = Updater(TOKEN, use_context=True)
 
-    updater.dispatcher.add_handler(CommandHandler("download_audio_to_file", download_handler))
+    updater.dispatcher.add_handler(CommandHandler("download", download_handler))
     updater.dispatcher.add_handler(MessageHandler(Filters.text, default_handler))
 
     run(updater)
