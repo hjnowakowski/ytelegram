@@ -7,6 +7,8 @@ import validators
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandler, Filters
 from downloader import download_audio_to_file, download_metadata_to_file, get_metadata_from_file
+import time
+from telegram.ext.dispatcher import run_async
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -37,6 +39,7 @@ else:
     sys.exit(1)
 
 
+@run_async
 def download_handler(update: Update, context: CallbackContext):
 
     if update.effective_chat['id'] not in allowedUserIds:
@@ -57,7 +60,6 @@ def download_handler(update: Update, context: CallbackContext):
 
 
 def default_handler(update: Update, context: CallbackContext):
-
     if update.effective_chat['id'] not in allowedUserIds:
         update.message.reply_text('Your user is not allowed to use this bot.')
         return

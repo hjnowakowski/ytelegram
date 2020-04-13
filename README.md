@@ -45,6 +45,8 @@ limitations:
 
 `docker image build -t ytelegram:2.0 .`
 
+`docker run --env-file .env ytelegram:2.0`
+
 
 ## Q&A (about decisions made threw out the development process)
 
