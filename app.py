@@ -1,66 +1,61 @@
 from __future__ import unicode_literals
 
-import logging
 import os
-import random
 import sys
 import validators
-
-from downloader import download
-
-from telegram import Update, InputMediaAudio, InlineQueryResultArticle
-from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandler, Filters
-
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-logger = logging.getLogger()
-
-mode = os.getenv("MODE")
-TOKEN = os.getenv("TOKEN")
-
-if mode == "dev":
-    def run(updater):
-        updater.start_polling()
-elif mode == "prod":
-    def run(updater):
-        PORT = int(os.environ.get("PORT", "8443"))
-        HEROKU_APP_NAME = os.environ.get("HEROKU_APP_NAME")
-        updater.start_webhook(listen="0.0.0.0",
-                              port=PORT,
-                              url_path=TOKEN)
-        updater.bot.set_webhook("https://{}.herokuapp.com/{}".format(HEROKU_APP_NAME, TOKEN))
-else:
-    logger.error("No MODE specified!")
-    sys.exit(1)
+from telegram import Update
+from telegram.ext import Updater, CallbackContext, MessageHandler, Filters, dispatcher
+from downloader_facade import download, get_metadata, get_metadata_field
+import config
+import asyncio
 
 
-def download_handler(update: Update, context: CallbackContext):
-    if os.path.isfile('/app/audio-file/file.mp3'):
-        context.bot.send_audio(chat_id=update.effective_chat.id, audio=open('/app/audio-file/file.mp3', 'rb'),
-                               timeout=512)
-    else:
-        update.message.reply_text('You first need to provide a valid URL so i can download a file\n'
-                                  'Just send me a URL and after downloading it I can send it to you!')
-
-
+@dispatcher.run_async
 def default_handler(update: Update, context: CallbackContext):
-    URL = update.effective_message.text
-    if validators.url(URL):
-        update.message.reply_text('Oh User! It\'s a url!\nIm downloading it, give me few minutes')
-        download(URL)
-        update.message.reply_text('Done downloading, Ill send it to you!\nThis might take a while...')
-        context.bot.send_audio(chat_id=update.effective_chat.id, audio=open('/app/audio-file/file.mp3', 'rb'),
-                               timeout=512)
+    if update.effective_chat['id'] not in config.allowedTelegramUserIds:
+        update.message.reply_text('Your user is not allowed to use this bot.')
+        return
+    url = update.effective_message.text
+    if not validators.url(url):
+        update.message.reply_text('Hello user!\nThe message you provided is not a URL, please correct it.')
     else:
-        update.message.reply_text('Hello user!')
+        asyncio.run(download(url, str(update.effective_chat['id'])))
+        metadata = get_metadata(url)
+        print(metadata)
+        update.message.reply_text('Done downloading, Ill send it to you!\nThis might take a while...')
+        asyncio.run(send_audio(context, update, metadata))
+
+
+async def send_audio(context, update, metadata):
+    var = context.bot.send_audio(title=metadata['title'],
+                                 performer=metadata['uploader'],
+                                 duration=metadata['duration'],
+                                 chat_id=update.effective_chat.id,
+                                 audio=open(
+                                     config.AUDIO_FILES_PATH + '/' + str(update.effective_chat['id']) +
+                                     "/" + metadata['id'] + ".mp3",
+                                     'rb'),
+                                 timeout=512)
+    print('Sent audio:\n', var, '\n     ---')
+
+
+def run_updater(updater):
+    if config.MODE == 'dev':
+        updater.start_polling()
+    elif config.MODE == 'prod':
+        port = int(os.environ.get("PORT", "8443"))
+        heroku_app_name = os.environ.get("HEROKU_APP_NAME")
+        updater.start_webhook(listen="0.0.0.0",
+                              port=port,
+                              url_path=config.TOKEN)
+        updater.bot.set_webhook("https://{}.herokuapp.com/{}".format(heroku_app_name, config.TOKEN))
+    else:
+        print('No MODE specified!')
+        sys.exit(1)
 
 
 if __name__ == '__main__':
-    logger.info("Starting bot")
-    updater = Updater(TOKEN, use_context=True)
-
-    updater.dispatcher.add_handler(CommandHandler("download", download_handler))
-    updater.dispatcher.add_handler(MessageHandler(Filters.text, default_handler))
-
-    run(updater)
+    print('Starting...')
+    telegram_updater = Updater(config.TOKEN, use_context=True)
+    telegram_updater.dispatcher.add_handler(MessageHandler(Filters.text, default_handler))
+    run_updater(telegram_updater)
