@@ -19,10 +19,15 @@ async def download(url, user_id):
 
 async def download_audio_to_file(url, local_config):
     with youtube_dl.YoutubeDL(local_config) as ydl:
-        ydl.download([url])
+        try:
+            ydl.download([url])
+        except youtube_dl.utils.DownloadError as e:
+            print(e)
+            raise Exception(e)
 
 
 def get_metadata(url):
+    # TODO: move options in one place
     options = {
         'nocheckcertificate': True,
         'skip_download': True
