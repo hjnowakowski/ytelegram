@@ -1,66 +1,53 @@
 from __future__ import unicode_literals
 
-import os
 import sys
 import validators
-# TODO: try to beautify imports
+import config
+import asyncio
+import utils
 from telegram import Update
 from telegram.ext import Updater, CallbackContext, MessageHandler, Filters, dispatcher
 from downloader import download, get_metadata
-import config
-import asyncio
 
 
 @dispatcher.run_async
 def default_handler(update: Update, context: CallbackContext):
-    # TODO: move hardcoded text to config.py
-    if update.effective_chat['id'] not in config.allowedTelegramUserIds:
-        update.message.reply_text('Your user is not allowed to use this bot.')
+    if update.effective_chat['id'] not in config.ALLOWED_TELEGRAM_USER_IDS:
+        update.message.reply_text(config.USER_NOT_ALLOWED_MSG)
         return
     url = update.effective_message.text
     if not validators.url(url):
-        update.message.reply_text('Hello user!\nThe message you provided is not a URL, please correct it.')
+        update.message.reply_text(config.NOT_URL_MSG)
     else:
         metadata = get_metadata(url)
-        update.message.reply_text('Hi! We are downloading ' + str(metadata['title']) +
-                                  '\nPlease be patient,  downloading longer videos (~1.5h) might take up to few minutes')
+        update.message.reply_text(config.START_DOWNLOADING_CONFIRMATION_MSG.format(str(metadata['title'])))
         asyncio.run(download(url, str(update.effective_chat['id'])))
-        update.message.reply_text('Done downloading, I\'m are sending it to you!')
+        update.message.reply_text(config.END_DOWNLOADING_CONFIRMATION_MSG)
         asyncio.run(send_audio(context, update, metadata))
 
 
 async def send_audio(context, update, metadata):
-    # TODO: remove redundant variable here
-    var = context.bot.send_audio(title=metadata['title'],
-                                 performer=metadata['uploader'],
-                                 duration=metadata['duration'],
-                                 chat_id=update.effective_chat.id,
-                                 audio=open(
-                                     config.AUDIO_FILES_PATH + '/' + str(update.effective_chat['id']) +
-                                     "/" + metadata['id'] + ".mp3",
-                                     'rb'),
-                                 timeout=512)
+    context.bot.send_audio(
+        title=metadata['title'],
+        performer=metadata['uploader'],
+        duration=metadata['duration'],
+        chat_id=update.effective_chat.id,
+        audio=open(utils.get_audio_file_path(str(update.effective_chat['id']), metadata['id']), 'rb'),
+        timeout=config.SEND_AUDIO_FILE_TIMEOUT)
     # TODO use logger instead
-    print('Sent audio:\n', var, '\n     ---')
+    print('Sent audio file')
 
 
 def init_updater(updater):
-    # TODO: run this line if only on prod env
-    # config.set_delete_file_rotation_time(config.DELETE_FILE_ROTATION_TIME_MIN)
-
-    # TODO: Rename MODES
-    if config.MODE == 'dev':
+    if config.DELETE_FILE_ROTATION_ENABLED:
+        utils.activate_delete_file_rotation()
+    if config.MODE == 'local' or config.MODE == 'local-docker':
         updater.start_polling()
-    elif config.MODE == 'prod':
-        # TODO: move config to config
-        port = int(os.environ.get("PORT", "8443"))
-        heroku_app_name = os.environ.get("HEROKU_APP_NAME")
-        # TODO: move hardcoded values to config
+    elif config.MODE == 'heroku':
         updater.start_webhook(listen="0.0.0.0",
-                              port=port,
+                              port=config.HEROKU_PORT,
                               url_path=config.TOKEN)
-        # TODO: move url String to config
-        updater.bot.set_webhook("https://{}.herokuapp.com/{}".format(heroku_app_name, config.TOKEN))
+        updater.bot.set_webhook(config.HEROKU_WEBHOOK_URL)
     else:
         print('No MODE specified!')
         sys.exit(1)

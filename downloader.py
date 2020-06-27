@@ -6,7 +6,7 @@ import copy
 
 async def download(url, user_id):
     # create a copy of the config so threads don't overwrite each data
-    local_ydl_audio_config = copy.deepcopy(config.ydl_audio)
+    local_ydl_audio_config = copy.deepcopy(config.YDL_AUDIO_CONFIG)
     # make sure we have a directory created for a user
     if not os.path.exists(config.AUDIO_FILES_PATH + '/' + user_id):
         os.mkdir(config.AUDIO_FILES_PATH + '/' + user_id)
@@ -27,17 +27,8 @@ async def download_audio_to_file(url, local_config):
 
 
 def get_metadata(url):
-    # TODO: move options in one place
-    options = {
-        'nocheckcertificate': True,
-        'skip_download': True
-    }
-    return youtube_dl.YoutubeDL(options).extract_info(url)
+    return youtube_dl.YoutubeDL(config.YDL_METADATA_CONFIG).extract_info(url)
 
 
 def get_metadata_field(url, field):
-    options = {
-        'nocheckcertificate': True,
-        'skip_download': True
-    }
-    return youtube_dl.YoutubeDL(options).extract_info(url)[field]
+    return youtube_dl.YoutubeDL(config.YDL_METADATA_CONFIG).extract_info(url)[field]

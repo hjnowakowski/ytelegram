@@ -1,19 +1,23 @@
 import os
-import subprocess as sp
 
 AUDIO_FILES_PATH = os.getenv("FILES_PATH")
 MODE = os.getenv("MODE")
 TOKEN = os.getenv("TOKEN")
 
-DELETE_FILE_ROTATION_TIME_MIN = 10
+if os.getenv("PORT") is not None:
+    HEROKU_PORT = int(os.getenv("PORT"))
+HEROKU_APP_NAME = os.getenv("HEROKU_APP_NAME")
 
-allowedTelegramUserIds = [
-    643375696,
-    464401808
-]
+HEROKU_WEBHOOK_URL = "https://{}.herokuapp.com/{}".format(HEROKU_APP_NAME, TOKEN)
 
-ydl_audio = {
-    'format': 'bestaudio/best',
+DELETE_FILE_ROTATION_ENABLED = False
+DELETE_FILE_ROTATION_TIME = 10
+
+SEND_AUDIO_FILE_TIMEOUT = 512
+ALLOWED_TELEGRAM_USER_IDS = [int(user_id) for user_id in os.getenv("ALLOWED_TELEGRAM_USERS").split(' ')]
+
+YDL_AUDIO_CONFIG = {
+    'format': 'bestaudio[abr<=80]',
     'postprocessors': [{
         'key': 'FFmpegExtractAudio',
         'preferredcodec': 'mp3',
@@ -25,26 +29,15 @@ ydl_audio = {
     'updatetime': False
 }
 
-# TODO: move this method to utils file
-def set_delete_file_rotation_time(minutes):
-    cron_job_path = "/etc/cron.d/delete-audio-files-cron"
-    delete_files_cron_job = "* * * * * find {} -type f -mmin +{} -exec rm -f -- {{}} \\; \n"\
-        .format(AUDIO_FILES_PATH, minutes)
-    try:
-        with open(cron_job_path, "w") as file:
-            file.write(delete_files_cron_job)
-    except IOError as exc:
-        print(exc)
-    os.chmod(cron_job_path, 644)
-    # add the new cronjob to crontab
-    sp.run(["crontab", cron_job_path])
-    # run cron process
-    sp.run(["cron"])
+YDL_METADATA_CONFIG = {
+    'nocheckcertificate': True,
+    'skip_download': True
+}
 
+# BOT'S MESSAGES
 
-# TODO: move to utils
-def verify_execution_environment():
-    print("Verification")
-    # cron
-    # FFmpeg
-    # files_path exists
+USER_NOT_ALLOWED_MSG = 'Your user is not allowed to use this bot.'
+NOT_URL_MSG = 'Hello user!\nThe message you provided is not a URL, please correct it.'
+START_DOWNLOADING_CONFIRMATION_MSG = 'Hi! We are downloading {}\n Please be patient, downloading longer videos (' \
+                                     '~1.5h) might take up to few minutes.'
+END_DOWNLOADING_CONFIRMATION_MSG = 'Done downloading, I\'m sending it to you!'
