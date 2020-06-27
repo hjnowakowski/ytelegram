@@ -9,7 +9,7 @@
 
 ## Description
 <div align="center"> 
-<img src="assets/ytelegram-demo.gif">
+<img src="readme-assets/ytelegram-demo.gif">
 </div>
 
 
