@@ -15,10 +15,6 @@ jobs:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: heroku container:login 
       - name: Push container to Heroku Registry
-        env: 
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-        run: heroku container:push -a ${{ secrets.HEROKU_APP_NAME }} --recursive --app ytelegram-bot
+        run: heroku container:push -a ytelegram-bot web
       - name: Release the app
-        env: 
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-        run: heroku container:release -a ${{ secrets.HEROKU_APP_NAME }} --recursive --app ytelegram-bot
+        run: heroku container:release ytelegram-bot web
