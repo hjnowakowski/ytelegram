@@ -17,4 +17,4 @@ jobs:
       - name: Push container to Heroku Registry
         run: heroku container:push -a ytelegram-bot web
       - name: Release the app
-        run: heroku container:release ytelegram-bot web
+        run: heroku container:release -a ytelegram-bot web
