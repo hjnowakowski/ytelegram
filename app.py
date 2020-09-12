@@ -54,7 +54,7 @@ def init_updater(updater):
 
 
 if __name__ == '__main__':
-    print('Starting...')
+    print('Starting... :)')
     telegram_updater = Updater(config.TOKEN, use_context=True)
     telegram_updater.dispatcher.add_handler(MessageHandler(Filters.text, default_handler))
     init_updater(telegram_updater)
