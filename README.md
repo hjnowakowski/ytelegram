@@ -7,6 +7,8 @@
   </a>
 </p>
 
+![Heroku CD](https://github.com/hjnowakowski/ytelegram/workflows/Heroku%20CD/badge.svg)
+
 ## Description
 <div align="center"> 
 <img src="readme-assets/ytelegram-demo.gif">
