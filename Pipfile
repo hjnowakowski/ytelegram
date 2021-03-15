@@ -5,9 +5,9 @@ url = "https://pypi.org/simple"
 [dev-packages]
 
 [packages]
-youtube_dl = "*"
-python-telegram-bot = "*"
-validators = "*"
+youtube_dl = "2021.03.14"
+python-telegram-bot = "13.4.1"
+validators = "0.18.1"
 
 [requires]
-python_version = "3.7"
+python_version = "3.9"

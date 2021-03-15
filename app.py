@@ -10,7 +10,6 @@ from telegram.ext import Updater, CallbackContext, MessageHandler, Filters, disp
 from downloader import download, get_metadata
 
 
-@dispatcher.run_async
 def default_handler(update: Update, context: CallbackContext):
     if update.effective_chat['id'] not in config.ALLOWED_TELEGRAM_USER_IDS:
         update.message.reply_text(config.USER_NOT_ALLOWED_MSG)
@@ -56,5 +55,5 @@ def init_updater(updater):
 if __name__ == '__main__':
     print('Starting... :)')
     telegram_updater = Updater(config.TOKEN, use_context=True)
-    telegram_updater.dispatcher.add_handler(MessageHandler(Filters.text, default_handler))
+    telegram_updater.dispatcher.add_handler(MessageHandler(Filters.text, default_handler, run_async=True))
     init_updater(telegram_updater)
