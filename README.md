@@ -10,74 +10,31 @@
 ![Heroku CD](https://github.com/hjnowakowski/ytelegram/workflows/Heroku%20CD/badge.svg)
 
 ## Description
+
 <div align="center"> 
 <img src="readme-assets/ytelegram-demo.gif">
 </div>
 
-
-Projec
-
-
-## How it works
-
-
-
-
-## Features per version
-
-1.0 (currently 0.9):
-- 
-
-limitations: 
-- 
-
-
-
+The `ytelegram` is a self-hosted project that makes it easy to download youtube videos in audio form directly from the Telegram app. Project uses `python-telegram-bot` to easily access telegram API and `youtube-dl` to download the content from the web. Some features are yet to be done, see Issues section for more information. If you are downloading a lot of content from YouTube, consider doing so by subscribing to their paid plan.
 
 ## Deployment
 
 ### Heroku
 
-`heroku container:push web --app <app-name>`
-
-`heroku container:release web --app <app-name>`
-
-`heroku logs -t --app <app-name>`
-
-### locally via Docker 
+```bash
+heroku container:push web --app <heroku-app-name>
+heroku container:release web --app <heroku-app-name>
+heroku logs -t --app <heroku-app-name>
+```
 
 
-`docker rm ytelegram`
+### locally with Docker 
 
-`docker image build -t ytelegram:2.0 .`
-
-`docker run --env-file .env ytelegram:2.0`
-
-
-## Q&A (about decisions made threw out the development process)
-
-- why download json metadata separately instead of relying on 
-        `{
-            'key': 'FFmpegMetadata'
-        }`
-- why preferred quality is set to 80 
-
-`'postprocessors': [{
-        'key': 'FFmpegExtractAudio',
-        'preferredcodec': 'mp3',
-        'preferredquality': '80',
-    },`
-
-- why not use s3 for keeping files 
-
-- why only one user can use it 
-
-- how i limited the users that can use the service (+ how to check for user id)
-
-- why i dont support video 
-
-- why I choose heroku 
-
+``` bash
+docker rm ytelegram
+docker image build -t ytelegram:2.0 .
+docker run --env-file .env ytelegram:2.0
+```
 
 ## Author
 
