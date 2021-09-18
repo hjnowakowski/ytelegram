@@ -43,10 +43,11 @@ def init_updater(updater):
     if config.MODE == 'local' or config.MODE == 'local-docker':
         updater.start_polling()
     elif config.MODE == 'heroku':
-        updater.start_webhook(listen="0.0.0.0",
-                              port=config.HEROKU_PORT,
-                              url_path=config.TOKEN)
-        updater.bot.set_webhook(config.HEROKU_WEBHOOK_URL)
+        try:
+            updater.start_webhook(listen="0.0.0.0", port=config.HEROKU_PORT, url_path=config.TOKEN, webhook_url=config.HEROKU_WEBHOOK_URL)
+        except:
+            print("Unexpected error:", sys.exc_info()[0])
+            raise
     else:
         print('No MODE specified!')
         sys.exit(1)
